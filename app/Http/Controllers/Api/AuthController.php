@@ -11,14 +11,23 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+
+    public function user(Request $request)
+{
+    return response()->json([
+        'user' => $request->user()
+    ], 200);
+}
+public function register(Request $request)
 {
     $registrationData = $request->all();
 
     $validate = Validator::make($registrationData, [
         'name' => 'required|max:60',
+        'handle' => 'required|max:20|unique:users',
         'email' => 'required|email:rfc,dns|unique:users',
-        'password' => 'required|min:8|confirmed', // Laravel will automatically check for `password_confirmation`
+        'password' => 'required|min:8',
+        'no_telp' => 'required|min:10',
     ]);
 
     if ($validate->fails()) {
@@ -26,13 +35,7 @@ class AuthController extends Controller
     }
 
     $registrationData['password'] = bcrypt($registrationData['password']);
-
-    // Hanya ambil field yang dibutuhkan saja
-    $user = User::create([
-        'name' => $registrationData['name'],
-        'email' => $registrationData['email'],
-        'password' => $registrationData['password'],
-    ]);
+    $user = User::create($registrationData);
 
     return response([
         'message' => 'Register Success',
@@ -65,6 +68,22 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'access_token' => $token
         ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'handle' => 'nullable|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'no_telp' => 'nullable|string|max:20',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json(['message' => 'Profil berhasil diperbarui', 'user' => $user]);
     }
 
     public function logout(Request $request)

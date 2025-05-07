@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProdukController;
+use App\Http\Controllers\Api\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,8 +20,11 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+Route::get('/produk', [ProdukController::class, 'index']);
 Route::post('/register',[App\Http\Controllers\Api\AuthController::class,'register']);
 Route::post('/login',[App\Http\Controllers\Api\AuthController::class,'login']);
 
 Route::middleware('auth:api')->group(function(){
+    Route::get('/user', [App\Http\Controllers\Api\AuthController::class, 'user']);
+    Route::put('/user/update', [AuthController::class, 'updateProfile']);
     });
