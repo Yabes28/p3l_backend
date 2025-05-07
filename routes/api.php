@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AlamatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,4 +28,9 @@ Route::post('/login',[App\Http\Controllers\Api\AuthController::class,'login']);
 Route::middleware('auth:api')->group(function(){
     Route::get('/user', [App\Http\Controllers\Api\AuthController::class, 'user']);
     Route::put('/user/update', [AuthController::class, 'updateProfile']);
+    Route::post('/alamat', [AlamatController::class, 'store']);
+    Route::get('/alamat', [AlamatController::class, 'index']);
+    Route::get('/alamat/{id}', [AlamatController::class, 'show']);
+    Route::put('/alamat/{id}', [AlamatController::class, 'update']);
+    Route::delete('/alamat/{id}', [AlamatController::class, 'destroy']);
     });
