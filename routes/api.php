@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AlamatController;
 use App\Http\Controllers\Api\MultiLoginController;
 use App\Http\Controllers\Api\PenitipController;
+use App\Http\Controllers\Api\RequestDonasiController;
+use App\Http\Controllers\Api\DonasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +41,13 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::put('/alamat/{id}', [AlamatController::class, 'update']);
     Route::delete('/alamat/{id}', [AlamatController::class, 'destroy']);
     Route::post('/penitip', [PenitipController::class, 'store']);
-    Route::get('/penitip', [PenitipController::class, 'index']); // show all
-    Route::delete('/penitip/{id}', [PenitipController::class, 'destroy']); // delete
+    Route::get('/penitip', [PenitipController::class, 'index']);
+    Route::delete('/penitip/{id}', [PenitipController::class, 'destroy']);
+    Route::get('/request-donasi', [RequestDonasiController::class, 'index']);
+    Route::post('/request-donasi', [RequestDonasiController::class, 'store']);
+    Route::put('/request-donasi/{id}', [RequestDonasiController::class, 'update']);
+    Route::delete('/request-donasi/{id}', [RequestDonasiController::class, 'destroy']);
+
+    Route::get('/donasi', [DonasiController::class, 'index']);
+    Route::post('/donasi', [DonasiController::class, 'store']);
     });

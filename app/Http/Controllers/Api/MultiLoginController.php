@@ -36,10 +36,10 @@ class MultiLoginController extends Controller
                 return response()->json([
                     'message' => 'Login berhasil',
                     'user' => [
-                        'id' => $user->id,
+                        'id' => $user->id ?? $user->organisasiID ?? $user->penitipID ?? null,
                         'email' => $user->email,
-                        'name' => $user->name ?? $user->nama ?? $user->namaOrganisasi ?? 'Pengguna',
-                        'role' => $user->role ?? $tipe_akun,
+                        'name' => $user->name ?? $user->nama ?? $user->namaOrganisasi ?? '',
+                        'role' => $tipe_akun,
                     ],
                     'role' => $user->role ?? $tipe_akun,
                     'tipe_akun' => $tipe_akun,
@@ -118,6 +118,7 @@ class MultiLoginController extends Controller
             'user' => [
                 'id' => $user->penitipID ?? $user->id,
                 'name' => $user->nama ?? $user->name,
+                'handle' => $user->handle ?? '',
                 'email' => $user->email,
                 'role' => $tipe,
             ],
@@ -126,5 +127,7 @@ class MultiLoginController extends Controller
             'access_token' => $token,
         ]);
 
+
+        
     }
 }
