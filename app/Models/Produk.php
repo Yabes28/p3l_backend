@@ -14,8 +14,8 @@ class Produk extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'donasiID', 'penitipID', 'namaProduk', 'deskripsi',
+        'donasiID', 'penitipID', 'namaProduk',  'deskripsi',
         'harga', 'kategori', 'status', 'tglMulai',
-        'tglSelesai', 'garansi'
+        'tglSelesai', 'garansi', 'gambar',
     ];
 }

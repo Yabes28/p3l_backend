@@ -30,6 +30,8 @@ Route::post('/register',[App\Http\Controllers\Api\AuthController::class,'registe
 Route::post('/login',[App\Http\Controllers\Api\AuthController::class,'login']);
 Route::post('/multi-login', [MultiLoginController::class, 'login']);
 Route::post('/multi-register', [MultiLoginController::class, 'register']);
+Route::get('/produk', [ProdukController::class, 'index']);
+Route::post('/produk', [ProdukController::class,'store']);
 
 
 Route::middleware('auth:sanctum')->group(function(){
