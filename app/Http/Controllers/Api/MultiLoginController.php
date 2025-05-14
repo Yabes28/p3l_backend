@@ -29,6 +29,11 @@ class MultiLoginController extends Controller
         foreach ($tables as $tipe_akun => $model) {
             $user = $model::where('email', $credentials['email'])->first();
 
+            // $jabatan = '';
+            // if ($tipe_akun == 'pegawai') {
+            //     $jabatan = $user->jabatan; // Pastikan kolom jabatan ada di model Pegawai
+            // }
+
             if ($user && Hash::check($credentials['password'], $user->password)) {
                 // Buat token Sanctum
                 $token = $user->createToken('auth_token')->plainTextToken;
@@ -42,6 +47,25 @@ class MultiLoginController extends Controller
                         'role' => $tipe_akun,
                     ],
                     'role' => $user->role ?? $tipe_akun,
+                    'tipe_akun' => $tipe_akun,
+                    'token_type' => 'Bearer',
+                    'access_token' => $token,
+                ]);
+
+            }elseif ($user && $credentials['password'] === $user->password) {
+                // Buat token Sanctum
+                $token = $user->createToken('auth_token')->plainTextToken;
+
+                return response()->json([
+                    'message' => 'Login berhasil',
+                    'user' => [
+                        'id' => $user->id,
+                        'email' => $user->email,
+                        'name' => $user->name ?? $user->nama ?? $user->namaOrganisasi ?? 'Pengguna',
+                        'role' => $jabatan ?? $user->role ?? $tipe_akun,
+                    ],
+                    'role' => $jabatan ?? $user->role ?? $tipe_akun,
+                    //  'jabatan' => $jabatan, 
                     'tipe_akun' => $tipe_akun,
                     'token_type' => 'Bearer',
                     'access_token' => $token,

@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\MultiLoginController;
 use App\Http\Controllers\Api\PenitipController;
 use App\Http\Controllers\Api\RequestDonasiController;
 use App\Http\Controllers\Api\DonasiController;
-
+use App\Http\Controllers\Api\PegawaiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -52,4 +52,10 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::get('/donasi', [DonasiController::class, 'index']);
     Route::post('/donasi', [DonasiController::class, 'store']);
+
+    
+    Route::get('/pegawai', [PegawaiController::class, 'index']);
+    Route::post('/pegawai', [PegawaiController::class, 'store']);
+    Route::put('/pegawai/{id}', [PegawaiController::class, 'update']);
+    Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy']);
     });
