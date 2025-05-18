@@ -37,14 +37,19 @@ Route::post('/produk', [ProdukController::class,'store']);
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/user', [App\Http\Controllers\Api\AuthController::class, 'user']);
     Route::put('/user/update', [AuthController::class, 'updateProfile']);
+    
     Route::post('/alamat', [AlamatController::class, 'store']);
     Route::get('/alamat', [AlamatController::class, 'index']);
     Route::get('/alamat/{id}', [AlamatController::class, 'show']);
     Route::put('/alamat/{id}', [AlamatController::class, 'update']);
     Route::delete('/alamat/{id}', [AlamatController::class, 'destroy']);
+
     Route::post('/penitip', [PenitipController::class, 'store']);
     Route::get('/penitip', [PenitipController::class, 'index']);
     Route::delete('/penitip/{id}', [PenitipController::class, 'destroy']);
+    Route::get('/penitip/search', [PenitipController::class, 'search']);
+    Route::put('/penitip/{id}', [PenitipController::class, 'update']);
+
     Route::get('/request-donasi', [RequestDonasiController::class, 'index']);
     Route::post('/request-donasi', [RequestDonasiController::class, 'store']);
     Route::put('/request-donasi/{id}', [RequestDonasiController::class, 'update']);
