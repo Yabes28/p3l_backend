@@ -12,6 +12,7 @@ class Pembeli extends Authenticatable
 
     protected $primaryKey = 'pembeliID';
 
+
     protected $fillable = [
         'nama', 'email', 'password', 'nomorHP', 'alamat', 'poinLoyalitas', 'alamatID', 'ulasanID', 'role',
     ];
@@ -19,5 +20,12 @@ class Pembeli extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    public function alamatsIni()
+    {
+        return $this->hasMany(AlamatIni::class, 'pembeliID');
+    }
+
+
 }
 

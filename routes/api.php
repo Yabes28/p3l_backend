@@ -10,6 +10,11 @@ use App\Http\Controllers\Api\PenitipController;
 use App\Http\Controllers\Api\RequestDonasiController;
 use App\Http\Controllers\Api\DonasiController;
 use App\Http\Controllers\Api\PegawaiController;
+use App\Http\Controllers\Api\BarangController;
+use App\Http\Controllers\Api\TransaksiController;
+use App\Http\Controllers\Api\DetailTransaksiController;
+use App\Http\Controllers\Api\PenjadwalanController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,8 +31,8 @@ use App\Http\Controllers\Api\PegawaiController;
 // });
 
 Route::get('/produk', [ProdukController::class, 'index']);
-Route::post('/register',[App\Http\Controllers\Api\AuthController::class,'register']);
-Route::post('/login',[App\Http\Controllers\Api\AuthController::class,'login']);
+//Route::post('/register',[App\Http\Controllers\Api\AuthController::class,'register']);
+//Route::post('/login',[App\Http\Controllers\Api\AuthController::class,'login']);
 Route::post('/multi-login', [MultiLoginController::class, 'login']);
 Route::post('/multi-register', [MultiLoginController::class, 'register']);
 Route::get('/produk', [ProdukController::class, 'index']);
@@ -57,10 +62,40 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::get('/donasi', [DonasiController::class, 'index']);
     Route::post('/donasi', [DonasiController::class, 'store']);
-
     
     Route::get('/pegawai', [PegawaiController::class, 'index']);
     Route::post('/pegawai', [PegawaiController::class, 'store']);
     Route::put('/pegawai/{id}', [PegawaiController::class, 'update']);
     Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy']);
-    });
+    Route::get('/kurirs', [PegawaiController::class, 'getKurirs']);
+
+
+    Route::get('/barang-penitip/{id}', [BarangController::class, 'getByPenitip']);
+    Route::get('/barang/{id}', [BarangController::class, 'show']);
+    Route::get('/barang-search', [BarangController::class, 'search']);
+    Route::put('/barang-perpanjang/{id}', [BarangController::class, 'perpanjang']);
+    Route::post('/barang', [BarangController::class, 'store']);
+    Route::put('/barang-konfirmasi-ambil/{id}', [BarangController::class, 'konfirmasiAmbil']);
+    Route::put('/barang-donasikan/{id}', [BarangController::class, 'donasikan']);
+    Route::put('/barang-diambil/{id}', [BarangController::class, 'markAsTaken']);
+    Route::get('/barang-menunggu-diambil', [BarangController::class, 'semuaMenungguDiambil']);
+    Route::put('/barang-diterima/{id}', [BarangController::class, 'tandaiDiambil']);
+    Route::get('/gudang-barang-diambil', [BarangController::class, 'gudangBarangDiambil']);
+
+    Route::apiResource('/transaksis', TransaksiController::class);
+    Route::apiResource('/detail-transaksis', DetailTransaksiController::class);
+
+    Route::get('/gudang-transaksis', [TransaksiController::class, 'index']);
+
+    Route::post('/penjadwalans', [PenjadwalanController::class, 'store']);
+    Route::get('/penjadwalans', [PenjadwalanController::class, 'index']);
+    Route::put('/penjadwalans/{id}/update-status', [PenjadwalanController::class, 'updateStatus']);
+    Route::put('/penjadwalans/{id}/konfirmasi-selesai', [PenjadwalanController::class, 'konfirmasiSelesai']);
+    Route::put('/penjadwalans/{id}/konfirmasi-diterima', [PenjadwalanController::class, 'konfirmasiDiterima']);
+
+
+
+
+
+
+});

@@ -18,4 +18,6 @@ class Produk extends Model
         'harga', 'kategori', 'status', 'tglMulai',
         'tglSelesai', 'garansi', 'gambar',
     ];
+
+    
 }

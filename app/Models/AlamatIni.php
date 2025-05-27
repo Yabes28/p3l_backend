@@ -2,32 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Alamat extends Model
+class AlamatIni extends Model
 {
-    use HasFactory;
-
-    protected $table = 'alamat';
-
+    protected $table = 'alamats_ini';
     protected $primaryKey = 'alamatID';
+    public $timestamps = true;
 
     protected $fillable = [
-        'user_id',
+        'pembeliID',
         'namaAlamat',
         'namaPenerima',
         'noHpPenerima',
         'alamat',
         'kodePos',
     ];
-    public $timestamps = true;
 
-    // app/Models/Alamat.php
-
+    // Relasi ke model Pembeli
     public function pembeli()
     {
         return $this->belongsTo(Pembeli::class, 'pembeliID');
     }
-
 }

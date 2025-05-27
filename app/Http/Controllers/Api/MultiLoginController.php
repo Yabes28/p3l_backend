@@ -29,25 +29,74 @@ class MultiLoginController extends Controller
         foreach ($tables as $tipe_akun => $model) {
             $user = $model::where('email', $credentials['email'])->first();
 
-            if ($user && Hash::check($credentials['password'], $user->password)) {
-                // Buat token Sanctum
-                $token = $user->createToken('auth_token')->plainTextToken;
+            // $jabatan = null;
+            if (!$user) continue;
 
-                return response()->json([
-                    'message' => 'Login berhasil',
-                    'user' => [
-                        'id' => $user->id ?? $user->organisasiID ?? $user->penitipID ?? null,
-                        'email' => $user->email,
-                        'name' => $user->name ?? $user->nama ?? $user->namaOrganisasi ?? '',
-                        'role' => $tipe_akun,
-                        'jabatan' => $user->jabatan ?? null,
-                    ],
-                    'jabatan' => $user->jabatan ?? null,
-                    'role' => $user->role ?? $tipe_akun,
-                    'tipe_akun' => $tipe_akun,
-                    'token_type' => 'Bearer',
-                    'access_token' => $token,
-                ]);
+            $jabatan = $tipe_akun === 'pegawai' ? $user->jabatan ?? null : null;
+
+            $inputPassword = $credentials['password'];
+            $storedPassword = $user->password;
+
+            $isHashed = strlen($storedPassword) === 60 && str_starts_with($storedPassword, '$2y$');
+            $passwordValid = false;
+            // $passwordValid = $isHashed
+            //     ? Hash::check($inputPassword, $storedPassword)
+            //     : $inputPassword === $storedPassword;
+
+            // $isMatch = Hash::check($inputPassword, $storedPassword) || $inputPassword === $storedPassword;
+
+            // if ($tipe_akun == 'pegawai') {
+            //     $jabatan = $user->jabatan; // Pastikan kolom jabatan ada di model Pegawai
+            // }
+
+            if ($isHashed) {
+                $passwordValid = Hash::check($inputPassword, $storedPassword);
+            } else {
+                // Jika password belum di-hash dan cocok, hash dan simpan
+                if ($inputPassword === $storedPassword) {
+                    $passwordValid = true;
+                    $user->password = Hash::make($inputPassword);
+                    $user->save();
+                }
+            }
+
+            // if ($user && Hash::check($credentials['password'], $user->password)) 
+            // if ($user && $credentials['password'] === $user->password) {
+            //     // Buat token Sanctum
+            //     $token = $user->createToken('auth_token')->plainTextToken;
+
+            //     return response()->json([
+            //         'message' => 'Login berhasil',
+            //         'user' => [
+            //             'id' => $user->id,
+            //             'email' => $user->email,
+            //             'name' => $user->name ?? $user->nama ?? $user->namaOrganisasi ?? 'Pengguna',
+            //             'role' => $jabatan ?? $user->role ?? $tipe_akun,
+            //         ],
+            //         'role' => $jabatan ?? $user->role ?? $tipe_akun,
+            //         'jabatan' => $jabatan,
+            //         'tipe_akun' => $tipe_akun,
+            //         'token_type' => 'Bearer',
+            //         'access_token' => $token,
+            //     ]);
+            
+            if ($passwordValid) {
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login berhasil',
+                'user' => [
+                    'id' => $user->id ?? $user->organisasiID ?? $user->penitipID ?? null,
+                    'email' => $user->email,
+                    'name' => $user->name ?? $user->nama ?? $user->namaOrganisasi ?? 'Pengguna',
+                    'role' => $jabatan ?? $user->role ?? $tipe_akun,
+                ],
+                'role' => $jabatan ?? $user->role ?? $tipe_akun,
+                'jabatan' => $jabatan,
+                'tipe_akun' => $tipe_akun,
+                'token_type' => 'Bearer',
+                'access_token' => $token,
+            ]); 
 
             }
         }

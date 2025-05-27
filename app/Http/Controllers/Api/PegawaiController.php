@@ -8,12 +8,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Pegawai;
+use Illuminate\Support\Facades\Auth;
 
 class PegawaiController extends Controller
 {
 
     public function index()
     {
+        $user = Auth::user();
+        \Log::info('Current user:', ['role' => $user?->role, 'model' => get_class($user)]);
         return response()->json(Pegawai::all());
     }
     
@@ -62,19 +65,26 @@ class PegawaiController extends Controller
     }
 
     public function destroy($id)
-{
-    $pegawai = Pegawai::find($id);
-    if (!$pegawai) {
-        return response()->json(['message' => 'Pegawai tidak ditemukan'], 404);
+    {
+        $pegawai = Pegawai::find($id);
+        if (!$pegawai) {
+            return response()->json(['message' => 'Pegawai tidak ditemukan'], 404);
+        }
+
+        // Hapus foto KTP dari storage jika ada
+        // if ($penitip->foto_ktp && Storage::exists(str_replace('storage/', 'public/', $penitip->foto_ktp))) {
+        //     Storage::delete(str_replace('storage/', 'public/', $penitip->foto_ktp));
+        // }
+
+        $pegawai->delete();
+
+        return response()->json(['message' => 'Pegawai berhasil dihapus']);
     }
 
-    // Hapus foto KTP dari storage jika ada
-    // if ($penitip->foto_ktp && Storage::exists(str_replace('storage/', 'public/', $penitip->foto_ktp))) {
-    //     Storage::delete(str_replace('storage/', 'public/', $penitip->foto_ktp));
-    // }
+    public function getKurirs()
+    {
+        $kurirs = \App\Models\Pegawai::where('jabatan', 'kurir')->get(['pegawaiID', 'nama', 'email']);
+        return response()->json($kurirs);
+    }
 
-    $pegawai->delete();
-
-    return response()->json(['message' => 'Pegawai berhasil dihapus']);
-}
 }

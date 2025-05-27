@@ -21,4 +21,10 @@ class Pegawai extends Authenticatable
     protected $primaryKey = 'pegawaiID';
     public $incrementing = true;
     protected $keyType = 'int';
+
+    public function penjadwalans()
+    {
+        return $this->hasMany(Penjadwalan::class, 'pegawaiID');
+    }
+
 }
