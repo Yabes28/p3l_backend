@@ -29,12 +29,28 @@ class Transaksi extends Model
 
     public function penjadwalan()
     {
-        return $this->hasOne(Penjadwalan::class, 'transaksiID');
+        return $this->hasOne(Penjadwalan::class, 'transaksiID')->where('tipe', 'pengiriman');
     }
 
     public function pembeli()
     {
         return $this->belongsTo(Pembeli::class, 'pembeliID');
+    }
+
+    public function penitip()
+    {
+        return $this->belongsTo(Penitip::class, 'penitipID');
+    }
+
+    public function alamat()
+    {
+        return $this->belongsTo(\App\Models\AlamatIni::class, 'alamatID', 'alamatID');
+    }
+
+
+    public function penjadwalanPengiriman()
+    {
+        return $this->hasOne(Penjadwalan::class, 'transaksiID')->where('tipe', 'pengiriman');
     }
 
 

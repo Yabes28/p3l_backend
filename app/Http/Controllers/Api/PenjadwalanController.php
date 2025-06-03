@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Penjadwalan;
 use Carbon\Carbon;
+use App\Models\Transaksi;
 
 class PenjadwalanController extends Controller
 {
@@ -14,39 +15,48 @@ class PenjadwalanController extends Controller
         $validated = $request->validate([
             'transaksiID' => 'required|exists:transaksis,transaksiID',
             'pegawaiID' => 'nullable|exists:pegawais,pegawaiID',
-            'tipe' => 'required|in:pengiriman,pengambilan',
             'tanggal' => 'required|date',
             'waktu' => 'required|date_format:H:i',
         ]);
 
-        // Validasi: tidak boleh pengiriman di hari yang sama jika pembelian lewat jam 16:00
-        $tanggal = \Carbon\Carbon::parse($validated['tanggal']);
-        $waktuSekarang = \Carbon\Carbon::now();
+        // Ambil data transaksi asli
+        $transaksi = Transaksi::findOrFail($validated['transaksiID']);
+        $tipe = $transaksi->tipe_transaksi === 'kirim' ? 'pengiriman' : 'pengambilan';
 
-        if ($tanggal->isToday() && $waktuSekarang->hour >= 16 && $validated['tipe'] === 'pengiriman') {
+        // Cek apakah sudah dijadwalkan
+        $sudahAda = Penjadwalan::where('transaksiID', $transaksi->transaksiID)
+            ->where('tipe', $tipe)
+            ->first();
+
+        if ($sudahAda) {
             return response()->json([
-                'message' => 'Pengiriman tidak bisa dijadwalkan hari ini karena sudah lewat pukul 16:00.'
+                'message' => '⚠️ Transaksi ini sudah memiliki jadwal ' . $tipe
+            ], 409);
+        }
+
+        // Validasi khusus pengiriman sore hari
+        if (now()->isToday() && now()->hour >= 16 && $tipe === 'pengiriman') {
+            return response()->json([
+                'message' => '❌ Pengiriman tidak bisa dijadwalkan hari ini karena sudah lewat pukul 16:00.'
             ], 422);
         }
 
-        // Simpan ke penjadwalans
-        $penjadwalan = \App\Models\Penjadwalan::create([
-            'transaksiID' => $validated['transaksiID'],
+        // Buat penjadwalan
+        $penjadwalan = Penjadwalan::create([
+            'transaksiID' => $transaksi->transaksiID,
             'pegawaiID' => $validated['pegawaiID'],
-            'tipe' => $validated['tipe'],
-            'status' => 'diproses', // status awal penjadwalan
+            'tipe' => $tipe,
+            'status' => 'diproses',
             'tanggal' => $validated['tanggal'],
             'waktu' => $validated['waktu'],
         ]);
 
-        // Update status transaksi (menjadi siap dikirim)
-        $statusTransaksiBaru = $validated['tipe'] === 'pengiriman' ? 'siap dikirim' : 'siap diambil';
-
-        \App\Models\Transaksi::where('transaksiID', $validated['transaksiID'])
-            ->update(['status' => $statusTransaksiBaru]);
+        // Update status transaksi
+        $transaksi->status = $tipe === 'pengiriman' ? 'siap dikirim' : 'siap diambil';
+        $transaksi->save();
 
         return response()->json([
-            'message' => 'Penjadwalan berhasil disimpan.',
+            'message' => "✅ Jadwal $tipe berhasil disimpan.",
             'penjadwalan' => $penjadwalan
         ]);
     }
@@ -71,6 +81,7 @@ class PenjadwalanController extends Controller
                 'namaKurir' => $jadwal->pegawai->nama ?? '-',
                 'namaPembeli' => $jadwal->transaksi->pembeli->nama ?? '-',
                 'alamat' => $jadwal->transaksi->pembeli->alamat ?? '-',
+                'transaksiID' => $jadwal->transaksiID,
                 'produk' => $jadwal->transaksi->detailTransaksis->map(function ($d) {
                     return $d->produk->namaProduk ?? 'Produk tidak diketahui';
                 })
@@ -89,16 +100,21 @@ class PenjadwalanController extends Controller
             return response()->json(['message' => 'Penjadwalan tidak ditemukan'], 404);
         }
 
-        // Cek apakah status saat ini valid untuk diubah
-        if (!in_array($penjadwalan->status, ['diproses', 'siap dikirim'])) {
-            return response()->json(['message' => 'Status tidak bisa diubah dari status saat ini.'], 400);
+        if ($penjadwalan->status !== 'diproses') {
+            return response()->json(['message' => 'Status tidak valid untuk ditandai kirim/ambil.'], 400);
         }
 
         try {
-            $penjadwalan->status = 'berhasil dikirim';
+            // Cek tipe
+            if ($penjadwalan->tipe === 'pengiriman') {
+                $penjadwalan->status = 'berhasil dikirim';
+            } elseif ($penjadwalan->tipe === 'pengambilan') {
+                $penjadwalan->status = 'berhasil diambil'; // bedakan agar logis
+            }
+
             $penjadwalan->save();
 
-            return response()->json(['message' => 'Status berhasil diperbarui', 'penjadwalan' => $penjadwalan]);
+            return response()->json(['message' => 'Status berhasil ditandai', 'penjadwalan' => $penjadwalan]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Gagal update status',
@@ -106,7 +122,6 @@ class PenjadwalanController extends Controller
             ], 500);
         }
     }
-
 
 
     public function konfirmasiSelesai($id)
@@ -130,20 +145,24 @@ class PenjadwalanController extends Controller
 
     public function konfirmasiDiterima($id)
     {
-        $penjadwalan = Penjadwalan::findOrFail($id);
+        $penjadwalan = \App\Models\Penjadwalan::with('transaksi')->findOrFail($id);
 
-        if ($penjadwalan->status !== 'berhasil dikirim') {
-            return response()->json(['message' => 'Penjadwalan belum berhasil dikirim.'], 400);
+        // Validasi: hanya lanjut jika status sebelumnya sudah "berhasil dikirim" atau "berhasil diambil"
+        if (!in_array($penjadwalan->status, ['berhasil dikirim', 'berhasil diambil'])) {
+            return response()->json(['message' => 'Penjadwalan belum ditandai berhasil sebelumnya.'], 400);
         }
 
+        // Ubah status penjadwalan dan transaksi menjadi "selesai"
         $penjadwalan->status = 'selesai';
         $penjadwalan->save();
 
-        // Update status transaksi juga jika perlu
         $penjadwalan->transaksi->status = 'selesai';
         $penjadwalan->transaksi->save();
 
-        return response()->json(['message' => 'Konfirmasi berhasil diterima.']);
+        return response()->json([
+            'message' => '✅ Transaksi selesai dikonfirmasi.',
+            'penjadwalan' => $penjadwalan
+        ]);
     }
 
 

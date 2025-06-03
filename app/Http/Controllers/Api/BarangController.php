@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Barang;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Models\Transaksi;
+use App\Models\Pembeli;
 
 class BarangController extends Controller
 {
@@ -34,14 +37,50 @@ class BarangController extends Controller
         return response()->json($barangs);
     }
 
-    // Menampilkan detail barang
+    // Menampilkan detail barang barang-transaksi
     public function show($id)
+    {
+        // Cari detail transaksi berdasarkan transaksiID
+        $detail = DB::table('detail_transaksis')->where('transaksiID', $id)->first();
+
+        if (!$detail) {
+            return response()->json(['message' => 'Detail transaksi tidak ditemukan'], 404);
+        }
+
+        $data = DB::table('detail_transaksis')
+            ->join('transaksis', 'transaksis.transaksiID', '=', 'detail_transaksis.transaksiID')
+            ->join('pembelis', 'pembelis.pembeliID', '=', 'transaksis.pembeliID')
+            ->join('barangs', 'barangs.idProduk', '=', 'detail_transaksis.produkID')
+            ->join('penitips', 'penitips.penitipID', '=', 'barangs.penitipID')
+            ->where('detail_transaksis.transaksiID', $id)
+            ->select(
+                'barangs.idProduk as idProduk',
+                'barangs.namaProduk',
+                'barangs.harga',
+                'barangs.gambar as gambar1',
+                'barangs.gambar2',
+                'penitips.nama as namaPenitip',
+                'pembelis.nama as namaPembeli',
+                'pembelis.alamat as alamatPengiriman',
+                'transaksis.waktu_transaksi as tglTransaksi',
+                'transaksis.status as statusTransaksi',
+                'transaksis.tipe_transaksi as tipe_transaksi'
+            )
+            ->first();
+
+        if (!$data) {
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        }
+
+        return response()->json($data);
+    }
+    public function showDetail($id)
     {
         $barang = Barang::find($id);
         if (!$barang) {
             return response()->json(['message' => 'Barang tidak ditemukan'], 404);
         }
-
+        
         return response()->json([
             'idProduk'     => $barang->idProduk,
             'namaProduk'   => $barang->namaProduk,
@@ -56,7 +95,7 @@ class BarangController extends Controller
             'gambar2_url'  => $barang->gambar2 ? url('storage/' . $barang->gambar2) : null,
         ]);
     }
-
+    
     // Fitur 53 - Pencarian barang
     public function search(Request $request)
     {
@@ -92,7 +131,7 @@ class BarangController extends Controller
         return response()->json($data);
     }
 
-    // Fitur 54 - Perpanjang masa penitipan 30 hari
+    // Perpanjang masa penitipan 30 hari
     public function perpanjang($id)
     {
         $barang = Barang::find($id);
@@ -115,8 +154,6 @@ class BarangController extends Controller
 
         return response()->json(['message' => 'Barang berhasil diperpanjang.']);
     }
-
-
 
     // Menambahkan barang baru dengan 2 gambar
     public function store(Request $request)
@@ -284,7 +321,5 @@ class BarangController extends Controller
 
         return response()->json($barang);
     }
-
-
 
 }

@@ -87,4 +87,10 @@ class PegawaiController extends Controller
         return response()->json($kurirs);
     }
 
+    public function getGudangs()
+    {
+        $gudangs = \App\Models\Pegawai::where('jabatan', 'gudang')->get(['pegawaiID', 'nama', 'email']);
+        return response()->json($gudangs);
+    }
+
 }
