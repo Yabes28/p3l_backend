@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\AuthController;
@@ -19,6 +18,9 @@ use App\Http\Controllers\Api\NotaPembeliController;
 use App\Http\Controllers\Api\NotifikasiController;
 use App\Http\Controllers\Api\FCMController;
 use App\Http\Controllers\Api\MerchandiseController;
+use App\Http\Controllers\Api\LaporanController;
+use App\Http\Controllers\Api\HunterController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -43,12 +45,15 @@ Route::post('/multi-register', [MultiLoginController::class, 'register']);
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::post('/produk', [ProdukController::class,'store']);
 
+
+
+
 //MOBILE
     Route::get('/barang/available', [BarangController::class, 'available']);
     Route::get('/barang-mobile/{id}', [BarangController::class, 'showDetailMobile']);
     Route::post('/klaim-merchandise', [MerchandiseController::class, 'klaimMerchandise']);
     Route::get('/merchandise', [MerchandiseController::class, 'index']);
-
+    
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/user', [App\Http\Controllers\Api\AuthController::class, 'user']);
     Route::put('/user/update', [AuthController::class, 'updateProfile']);
@@ -126,8 +131,14 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::get('/penitip-saldo-besar', [PenitipController::class, 'penitipSaldoBesar']);
 
+    Route::get('/laporan-penjualan-per-kategori', [LaporanController::class, 'laporanPerKategori']);
+    Route::get('/laporan-penitipan-habis', [LaporanController::class, 'laporanPenitipanHabis']);
+
     
 
+
+    Route::get('/hunter/profile', [HunterController::class, 'profile']);
+    Route::post('/hunter/history-komisi', [HunterController::class, 'riwayatKomisi']);
 
 
 
