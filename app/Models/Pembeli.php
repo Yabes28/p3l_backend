@@ -14,7 +14,7 @@ class Pembeli extends Authenticatable
 
 
     protected $fillable = [
-        'nama', 'email', 'password', 'nomorHP', 'alamat', 'poinLoyalitas', 'alamatID', 'ulasanID', 'role',
+        'nama', 'email', 'password', 'nomorHP', 'alamat', 'poinLoyalitas', 'alamatID', 'ulasanID', 'role', 'fcm_token'
     ];
 
     protected $hidden = [

@@ -16,6 +16,9 @@ use App\Http\Controllers\Api\DetailTransaksiController;
 use App\Http\Controllers\Api\PenjadwalanController;
 use App\Http\Controllers\Api\NotaKurirController;
 use App\Http\Controllers\Api\NotaPembeliController;
+use App\Http\Controllers\Api\NotifikasiController;
+use App\Http\Controllers\Api\FCMController;
+use App\Http\Controllers\Api\MerchandiseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +43,11 @@ Route::post('/multi-register', [MultiLoginController::class, 'register']);
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::post('/produk', [ProdukController::class,'store']);
 
+//MOBILE
+    Route::get('/barang/available', [BarangController::class, 'available']);
+    Route::get('/barang-mobile/{id}', [BarangController::class, 'showDetailMobile']);
+    Route::post('/klaim-merchandise', [MerchandiseController::class, 'klaimMerchandise']);
+    Route::get('/merchandise', [MerchandiseController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/user', [App\Http\Controllers\Api\AuthController::class, 'user']);
@@ -109,6 +117,22 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::get('/nota-pembeli-daftar', [NotaPembeliController::class, 'daftarTransaksi']);
     Route::get('/nota-pembeli-data/{id}', [NotaPembeliController::class, 'getNotaData']);
+
+    Route::post('/kirim-notifikasi', [NotifikasiController::class, 'kirimNotifikasi']);
+    Route::post('/simpan-fcm-token', [\App\Http\Controllers\Api\FCMController::class, 'simpanToken']);
+    Route::post('/kirim-notifikasi-uji', [NotifikasiController::class, 'kirimNotifUji']);
+    Route::post('/hapus-fcm-token', [FCMController::class, 'hapusToken']);
+    Route::post('/logout', [MultiLoginController::class, 'logout'])->middleware('auth:api');
+
+    Route::get('/penitip-saldo-besar', [PenitipController::class, 'penitipSaldoBesar']);
+
+    
+
+
+
+
+
+
 
 
 });

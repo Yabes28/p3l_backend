@@ -10,6 +10,9 @@ use App\Models\Pegawai;
 use App\Models\Pembeli;
 use App\Models\Penitip;
 use App\Models\Organisasi;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
 
 class MultiLoginController extends Controller
 {
@@ -177,8 +180,18 @@ class MultiLoginController extends Controller
             'token_type' => 'Bearer',
             'access_token' => $token,
         ]);
-
-
-        
     }
+
+    public function logout(Request $request)
+{
+    $user = $request->user();
+    if ($user) {
+        $user->update(['fcm_token' => null]);
+        $user->tokens()->delete(); // hapus semua personal tokens
+    }
+
+    return response()->json(['message' => 'Logout berhasil']);
+}
+
+
 }

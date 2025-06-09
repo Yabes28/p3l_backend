@@ -48,7 +48,7 @@ class NotaPembeliController extends Controller
         $totalBayar = $total - $potongan;
 
         // Hitung poin reward
-        $poin = floor($totalBayar / 10000 * 0.8);
+        $poin = floor($totalBayar / 10000);  // 1 poin per Rp10rb
         $bonus = $total > 500000 ? floor($poin * 0.2) : 0;
         $totalPoin = $poin + $bonus;
 

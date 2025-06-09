@@ -24,8 +24,15 @@ class Barang extends Model
         'garansi',
     ];
 
+    protected $dates = [
+        'tglMulai',
+        'tglSelesai',
+        'garansi',
+    ];
     public function penitip()
     {
         return $this->belongsTo(Penitip::class, 'penitipID', 'penitipID');
     }
+
+    
 }

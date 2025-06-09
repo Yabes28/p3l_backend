@@ -137,4 +137,12 @@ class PenitipController extends Controller
 
         return response()->json($results);
     }
+
+    public function penitipSaldoBesar()
+{
+    $penitip = \App\Models\Penitip::where('saldo', '>=', 500000)->get();
+
+    return response()->json($penitip);
+}
+
 }

@@ -12,6 +12,8 @@ class CekTransaksiHangus extends Command
 public function handle()
 {
     $limitDate = now()->subDays(2);
+    //$limitDate = now()->addDays(2);
+
 
     $penjadwalans = \App\Models\Penjadwalan::where('tipe', 'pengambilan')
         ->where('status', '!=', 'selesai')

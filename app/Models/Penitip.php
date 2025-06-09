@@ -14,7 +14,7 @@ class Penitip extends Authenticatable
 
     protected $fillable = [
         'nama', 'email', 'password', 'nomorHP', 'alamat', 'saldo',
-        'poinLoyalitas', 'role', 'nik', 'foto_ktp',
+        'poinLoyalitas', 'role', 'nik', 'foto_ktp', 'fcm_token'
     ];
 
     protected $hidden = [

@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\Penjadwalan;
 use Carbon\Carbon;
 use App\Models\Transaksi;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Illuminate\Support\Facades\Log;
 
 class PenjadwalanController extends Controller
 {
@@ -20,7 +24,11 @@ class PenjadwalanController extends Controller
         ]);
 
         // Ambil data transaksi asli
-        $transaksi = Transaksi::findOrFail($validated['transaksiID']);
+        $transaksi = Transaksi::with([
+    'pembeli',
+    'detailTransaksis.produk.penitip', // ✅ penting agar fcm_token bisa terbaca
+    'penjadwalan.pegawai'
+])->findOrFail($validated['transaksiID']);
         $tipe = $transaksi->tipe_transaksi === 'kirim' ? 'pengiriman' : 'pengambilan';
 
         // Cek apakah sudah dijadwalkan
@@ -34,12 +42,12 @@ class PenjadwalanController extends Controller
             ], 409);
         }
 
-        // Validasi khusus pengiriman sore hari
-        if (now()->isToday() && now()->hour >= 16 && $tipe === 'pengiriman') {
-            return response()->json([
-                'message' => '❌ Pengiriman tidak bisa dijadwalkan hari ini karena sudah lewat pukul 16:00.'
-            ], 422);
-        }
+        // //Validasi khusus pengiriman sore hari
+        // if (now()->isToday() && now()->hour >= 16 && $tipe === 'pengiriman') {
+        //     return response()->json([
+        //         'message' => '❌ Pengiriman tidak bisa dijadwalkan hari ini karena sudah lewat pukul 16:00.'
+        //     ], 422);
+        // }
 
         // Buat penjadwalan
         $penjadwalan = Penjadwalan::create([
@@ -55,6 +63,82 @@ class PenjadwalanController extends Controller
         $transaksi->status = $tipe === 'pengiriman' ? 'siap dikirim' : 'siap diambil';
         $transaksi->save();
 
+$factory = (new Factory)->withServiceAccount(storage_path('firebase/reusemart-5c1fc-d3b489b21ba7.json'));
+$messaging = $factory->createMessaging();
+
+// ✅ Ambil token-token
+$pembeliToken = optional($transaksi->pembeli)->fcm_token;
+$detail = $transaksi->detailTransaksis->first();
+
+Log::info('🧩 Detail transaksi pertama:', [
+    'produkID' => $detail?->produk?->idProduk,
+    'penitipID' => $detail?->produk?->penitip?->penitipID,
+    'penitipToken' => $detail?->produk?->penitip?->fcm_token,
+]);
+
+$pembeliToken = optional($transaksi->pembeli)->fcm_token;
+$penitipToken = optional($detail?->produk?->penitip)->fcm_token;
+$kurirToken = optional($penjadwalan->pegawai)->fcm_token;
+Log::info('📥 Token yang akan digunakan:', [
+    'pembeli' => $pembeliToken,
+    'penitip' => $penitipToken,
+    'kurir' => $kurirToken,
+]);
+
+// 📨 Buat isi notifikasi
+$judul = $tipe === 'pengiriman' ? 'Pesanan Akan Dikirim' : 'Pesanan Siap Diambil';
+$pesan = $tipe === 'pengiriman'
+    ? 'Barang kamu akan dikirim sesuai jadwal yang telah ditentukan.'
+    : 'Silakan datang mengambil barangmu sesuai jadwal yang ditentukan.';
+
+// 📤 Kirim ke pembeli
+if ($pembeliToken) {
+    try {
+        $messaging->send(
+            CloudMessage::withTarget('token', $pembeliToken)
+                ->withNotification(Notification::create($judul, $pesan))
+                ->withData(['tipe' => 'transaksi', 'id' => (string) $transaksi->transaksiID])
+        );
+        Log::info('✅ Notifikasi ke pembeli berhasil.');
+    } catch (\Throwable $e) {
+        Log::error('❌ Notifikasi ke pembeli gagal.', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+    }
+}
+
+// 📤 Kirim ke penitip
+if ($penitipToken) {
+    try {
+        $messaging->send(
+            CloudMessage::withTarget('token', $penitipToken)
+                ->withNotification(Notification::create('Update Barang', 'Barang titipan Anda sudah dijadwalkan.'))
+        );
+        Log::info('✅ Notifikasi ke penitip berhasil.');
+    } catch (\Throwable $e) {
+        Log::error('❌ Notifikasi ke penitip gagal.', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+    }
+}
+
+// 📤 Kirim ke kurir (jika pengiriman)
+if ($kurirToken && $tipe === 'pengiriman') {
+    try {
+        $messaging->send(
+            CloudMessage::withTarget('token', $kurirToken)
+                ->withNotification(Notification::create('Tugas Baru', 'Ada pengiriman baru yang dijadwalkan untuk Anda.'))
+        );
+        Log::info('✅ Notifikasi ke kurir berhasil.');
+    } catch (\Throwable $e) {
+        Log::error('❌ Notifikasi ke kurir gagal.', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+    }
+}
         return response()->json([
             'message' => "✅ Jadwal $tipe berhasil disimpan.",
             'penjadwalan' => $penjadwalan

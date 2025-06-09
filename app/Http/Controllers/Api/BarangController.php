@@ -322,4 +322,64 @@ class BarangController extends Controller
         return response()->json($barang);
     }
 
+    public function available()
+    {
+        try{
+        $barang = Barang::where('status', 'aktif')->get()->map(function ($b) {
+            return [
+                'idProduk'     => $b->idProduk,
+                'namaProduk'   => $b->namaProduk,
+                'deskripsi'    => $b->deskripsi,
+                'harga'        => $b->harga,
+                'kategori'     => $b->kategori,
+                'status'       => $b->status,
+                'gambar_url'   => $b->gambar ? url('storage/' . $b->gambar) : null,
+                'gambar2_url'  => $b->gambar2 ? url('storage/' . $b->gambar2) : null,
+                'tglMulai'     => $b->tglMulai,
+                'tglSelesai'   => $b->tglSelesai,
+                'garansi'      => $b->garansi,
+            ];
+        });
+
+        return response()->json($barang);
+    } catch (\Exception $e) {
+        \Log::error('❌ ERROR di BarangController@available: ' . $e->getMessage());
+        return response()->json(['error' => 'Internal Server Error'], 500);
+    }
+    }
+
+    public function showDetailMobile($id)
+{
+    try {
+        $barang = \App\Models\Barang::find($id);
+
+        if (!$barang) {
+            return response()->json(['message' => '❌ Barang tidak ditemukan'], 404);
+        }
+
+        return response()->json([
+    'idProduk' => $barang->idProduk,
+    'namaProduk' => $barang->namaProduk,
+    'deskripsi' => $barang->deskripsi,
+    'harga' => $barang->harga,
+    'kategori' => $barang->kategori,
+    'status' => $barang->status,
+    'gambar_url' => $barang->gambar ? url('storage/' . $barang->gambar) : null,
+    'gambar2_url' => $barang->gambar2 ? url('storage/' . $barang->gambar2) : null,
+    'tglMulai' => $barang->tglMulai ? date('Y-m-d', strtotime($barang->tglMulai)) : null,
+    'tglSelesai' => $barang->tglSelesai ? date('Y-m-d', strtotime($barang->tglSelesai)) : null,
+    'garansi' => $barang->garansi ? date('Y-m-d', strtotime($barang->garansi)) : null,
+    'penitipID' => $barang->penitipID,
+    'created_at' => $barang->created_at ? $barang->created_at->toDateTimeString() : null,
+]);
+
+    } catch (\Exception $e) {
+        \Log::error('❌ ERROR @showDetailMobile: ' . $e->getMessage());
+        return response()->json(['message' => 'Internal Server Error'], 500);
+    }
+}
+
+
+
+
 }
