@@ -6,6 +6,26 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AlamatController;
 use App\Http\Controllers\Api\MultiLoginController;
 use App\Http\Controllers\Api\PenitipController;
+use App\Http\Controllers\Api\BarangController;
+use App\Http\Controllers\Api\LaporanController;
+use App\Http\Controllers\Api\DetailTransaksiController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\HunterController;
+use App\Http\Controllers\Api\FCMController;
+use App\Http\Controllers\Api\DiskusiController;
+use App\Http\Controllers\Api\MerchandiseController;
+use App\Http\Controllers\Api\TransaksiController;
+use App\Http\Controllers\Api\RequestDonasiController;
+use App\Http\Controllers\Api\PenjadwalanController;
+use App\Http\Controllers\Api\PembeliController;
+use App\Http\Controllers\Api\NotifikasiController;
+use App\Http\Controllers\Api\NotaKurirController;
+use App\Http\Controllers\Api\organisasiController;
+use App\Http\Controllers\Api\LupaResetPassController;
+use App\Http\Controllers\Api\PegawaiController;
+use App\Http\Controllers\Api\DonasiController;
+use App\Http\Controllers\Api\NotaPembeliController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -87,7 +107,6 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('/uji-komisi/{id}', [TransaksiController::class, 'simpanKomisi']);
     Route::put('/transaksis/{id}/status', [App\Http\Controllers\Api\TransaksiController::class, 'updateStatusTransaksi']);
 
-
     Route::get('/gudang-transaksis', [TransaksiController::class, 'index']);
     Route::get('/transaksi-gudang', [TransaksiController::class, 'transaksiGudang']);
     Route::get('/index-gudang', [TransaksiController::class, 'indexGudang']);
@@ -119,17 +138,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('/laporan-penitipan-habis', [LaporanController::class, 'laporanPenitipanHabis']);
     Route::get('/laporan-penjualan-per-kategori-diperpanjang', [LaporanController::class, 'laporanPerKategoriDiperpanjang']);
 
-
-    
-
-
     Route::get('/hunter/profile', [HunterController::class, 'profile']);
     Route::post('/hunter/history-komisi', [HunterController::class, 'riwayatKomisi']);
-
-
-
-
-
-
 
 });
