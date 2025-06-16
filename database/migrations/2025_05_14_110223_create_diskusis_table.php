@@ -12,20 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('diskusis', function (Blueprint $table) {
-            $table->id('diskusiID');
-            $table->text('isi');
-            $table->dateTime('tanggal');
+    $table->id('diskusiID');
+    $table->text('isi');
+    $table->dateTime('tanggal');
 
-            // Relasi opsional: pembeli / pegawai
-            $table->unsignedBigInteger('pembeliID')->nullable();
-            $table->unsignedBigInteger('pegawaiID')->nullable();
-            $table->unsignedBigInteger('produkID');
+    // Relasi opsional: pembeli / pegawai
+    $table->unsignedBigInteger('pembeliID')->nullable();
+    $table->unsignedBigInteger('pegawaiID')->nullable();
+    $table->unsignedBigInteger('produkID');
 
-            // Foreign key (opsional, tergantung apakah tabel produk/pembeli/pegawai sudah ada)
-            $table->foreign('pembeliID')->references('pembeliID')->on('pembelis')->onDelete('set null');
-            $table->foreign('pegawaiID')->references('pegawaiID')->on('pegawais')->onDelete('set null');
-            $table->foreign('produkID')->references('idProduk')->on('produks')->onDelete('cascade');
-        });
+    $table->foreign('pembeliID')->references('pembeliID')->on('pembelis')->onDelete('set null');
+    $table->foreign('pegawaiID')->references('pegawaiID')->on('pegawais')->onDelete('set null');
+    $table->foreign('produkID')->references('idProduk')->on('barangs')->onDelete('cascade');
+});
+
 
     }
 

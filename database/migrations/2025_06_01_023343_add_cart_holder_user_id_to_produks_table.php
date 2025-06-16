@@ -8,20 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('produks', function (Blueprint $table) {
-            // Pastikan nama tabel users dan primary key-nya sesuai. Diasumsikan 'users' dan 'id'.
+        Schema::table('barangs', function (Blueprint $table) {
+            // Menambahkan foreign key ke pembelis (cart holder)
             $table->foreignId('cart_holder_user_id')
                   ->nullable()
-                  ->after('status') // Atur posisi kolom jika diinginkan
-                  ->constrained('pembelis','pembeliID') // Nama tabel users
-                  ->onDelete('set null'); // Jika user dihapus, produk tidak lagi dipegang
+                  ->after('status')
+                  ->constrained('pembelis', 'pembeliID') // pastikan 'pembelis' punya kolom 'pembeliID'
+                  ->onDelete('set null');
         });
     }
 
     public function down(): void
     {
-        Schema::table('produks', function (Blueprint $table) {
-            // Perhatikan urutan penghapusan constraint sebelum drop kolom
+        Schema::table('barangs', function (Blueprint $table) {
             $table->dropForeign(['cart_holder_user_id']);
             $table->dropColumn('cart_holder_user_id');
         });
