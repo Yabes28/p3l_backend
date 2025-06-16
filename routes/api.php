@@ -6,22 +6,6 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AlamatController;
 use App\Http\Controllers\Api\MultiLoginController;
 use App\Http\Controllers\Api\PenitipController;
-use App\Http\Controllers\Api\RequestDonasiController;
-use App\Http\Controllers\Api\DonasiController;
-use App\Http\Controllers\Api\PegawaiController;
-use App\Http\Controllers\Api\BarangController;
-use App\Http\Controllers\Api\TransaksiController;
-use App\Http\Controllers\Api\DetailTransaksiController;
-use App\Http\Controllers\Api\PenjadwalanController;
-use App\Http\Controllers\Api\NotaKurirController;
-use App\Http\Controllers\Api\NotaPembeliController;
-use App\Http\Controllers\Api\NotifikasiController;
-use App\Http\Controllers\Api\FCMController;
-use App\Http\Controllers\Api\MerchandiseController;
-use App\Http\Controllers\Api\LaporanController;
-use App\Http\Controllers\Api\HunterController;
-
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -38,22 +22,22 @@ use App\Http\Controllers\Api\HunterController;
 // });
 
 Route::get('/produk', [ProdukController::class, 'index']);
-//Route::post('/register',[App\Http\Controllers\Api\AuthController::class,'register']);
-//Route::post('/login',[App\Http\Controllers\Api\AuthController::class,'login']);
+Route::get('/produk/{id}', [ProdukController::class, 'show']);
+Route::get('/diskusiProduk/{id}', [DiskusiController::class, 'diskusiProduk']);
+
+// Route::get('/pembeli/{id}', [ProdukController::class, 'show']);
+// Route::get('/pegawai/{id}', [PegawaiController::class, 'show']);
+// Route::post('/register',[App\Http\Controllers\Api\AuthController::class,'register']);
+// Route::post('/login',[App\Http\Controllers\Api\AuthController::class,'login']);
 Route::post('/multi-login', [MultiLoginController::class, 'login']);
+// Route::post('/multi-register', [MultiLoginController::class, 'register']);
 Route::post('/multi-register', [MultiLoginController::class, 'register']);
-Route::get('/produk', [ProdukController::class, 'index']);
-Route::post('/produk', [ProdukController::class,'store']);
+Route::post('/forgot-password', [LupaResetPassController::class, 'forgotPassword']);
+Route::post('/user-forgot-password', [LupaResetPassController::class, 'gantiPassword']);
+// Route::post('/user-forgot-password', [LupaResetPassController::class, 'gantiPassword']);
+// Route::post('/reset-password', [LupaResetPassController::class, 'resetPassword']);
+Route::post('/pegawai/{id}/reset-password', [LupaResetPassController::class, 'resetPassword']);
 
-
-
-
-//MOBILE
-    Route::get('/barang/available', [BarangController::class, 'available']);
-    Route::get('/barang-mobile/{id}', [BarangController::class, 'showDetailMobile']);
-    Route::post('/klaim-merchandise', [MerchandiseController::class, 'klaimMerchandise']);
-    Route::get('/merchandise', [MerchandiseController::class, 'index']);
-    
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/user', [App\Http\Controllers\Api\AuthController::class, 'user']);
     Route::put('/user/update', [AuthController::class, 'updateProfile']);
