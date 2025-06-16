@@ -58,6 +58,13 @@ Route::post('/user-forgot-password', [LupaResetPassController::class, 'gantiPass
 // Route::post('/reset-password', [LupaResetPassController::class, 'resetPassword']);
 Route::post('/pegawai/{id}/reset-password', [LupaResetPassController::class, 'resetPassword']);
 
+//MOBILE
+    Route::get('/barang/available', [BarangController::class, 'available']);
+    Route::get('/barang-mobile/{id}', [BarangController::class, 'showDetailMobile']);
+    Route::post('/klaim-merchandise', [MerchandiseController::class, 'klaimMerchandise']);
+    Route::get('/merchandise', [MerchandiseController::class, 'index']);
+
+
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/user', [App\Http\Controllers\Api\AuthController::class, 'user']);
     Route::put('/user/update', [AuthController::class, 'updateProfile']);
