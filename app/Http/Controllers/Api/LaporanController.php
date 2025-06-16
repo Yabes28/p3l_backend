@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Barang;
 use App\Models\Penitip;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+
 
 
 class LaporanController extends Controller
@@ -104,5 +106,47 @@ public function laporanPenitipanHabis()
         return response()->json(['message' => 'Gagal ambil data'], 500);
     }
 }
+
+public function laporanPerKategoriDiperpanjang(Request $request)
+{
+    try {
+        // Ambil semua barang yang diperpanjang
+        $barangs = DB::table('barangs')
+            ->where('status', 'diperpanjang')
+            ->get();
+
+        // Ambil semua ID produk dari transaksi yang statusnya selesai
+        $transaksiProdukIDs = DB::table('transaksis')
+            ->where('status', 'selesai')
+            ->pluck('idProduk') // GANTI INI DENGAN NAMA KOLOM YANG BENAR!
+            ->toArray();
+
+        // Filter hanya barang yang ID-nya pernah ditransaksikan
+        $barangTerjual = $barangs->filter(function ($barang) use ($transaksiProdukIDs) {
+            return in_array($barang->idProduk, $transaksiProdukIDs);
+        });
+
+        // Hitung per kategori
+        $result = [];
+        foreach ($barangTerjual as $item) {
+            $kategori = $item->kategori ?? 'Tidak diketahui';
+            $result[$kategori] = ($result[$kategori] ?? 0) + 1;
+        }
+
+        return response()->json([
+            'kategori_diperpanjang' => $result
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('❌ Gagal ambil laporan barang diperpanjang', [
+            'error' => $e->getMessage(),
+            'line' => $e->getLine(),
+        ]);
+        return response()->json(['message' => 'Gagal ambil data'], 500);
+    }
+}
+
+
+
+
 
 }

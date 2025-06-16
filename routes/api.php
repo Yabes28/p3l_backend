@@ -133,6 +133,8 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::get('/laporan-penjualan-per-kategori', [LaporanController::class, 'laporanPerKategori']);
     Route::get('/laporan-penitipan-habis', [LaporanController::class, 'laporanPenitipanHabis']);
+    Route::get('/laporan-penjualan-per-kategori-diperpanjang', [LaporanController::class, 'laporanPerKategoriDiperpanjang']);
+
 
     
 
